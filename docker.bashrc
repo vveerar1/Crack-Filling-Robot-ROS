@@ -101,5 +101,5 @@ fi
 export ROS_DOMAIN_ID=0
 export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
 unset ROS_LOCALHOST_ONLY
-source /opt/ros/$ROS_DISTRO/setup.bash
+source /opt/ros/$ROS_DISTRO/install/setup.bash
 source /home/ros/ROS2/ros2_ws/install/setup.bash
