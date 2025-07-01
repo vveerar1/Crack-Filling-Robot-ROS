@@ -24,8 +24,8 @@ docker run -it \
     --env="XAUTHORITY=$XAUTH" \
     --volume="$XAUTH:$XAUTH" \
     --volume="$PWD":"/home/ros":"rw" \
-    --volume="$PWD/docker.bashrc":"/root/.bashrc":"ro" \
+    --volume="$PWD/docker.bashrc":"/home/ros/.bashrc":"ro" \
     dustynv/ros:humble-desktop-l4t-r36.4.0 \
-    bash
+    bash -c "adduser --disabled-password --gecos '' ros && su - ros"
 
 echo "Done."

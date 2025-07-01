@@ -6,6 +6,5 @@
 
 docker start ros2 && \
 
-docker exec -it \
+docker exec -it --user 1000:1000 \
     -w /home/ros/ ros2 bash
-
