@@ -19,6 +19,7 @@ docker run -it \
     --runtime nvidia \
     --gpus all \
     --privileged \
+    --restart=unless-stopped \
     --env="DISPLAY=$DISPLAY" \
     --env="QT_X11_NO_MITSHM=1" \
     --volume="/tmp/.X11-unix:/tmp/.X11-unix:rw" \

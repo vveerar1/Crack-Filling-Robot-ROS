@@ -17,6 +17,7 @@ docker run -it \
     --name=ros2 \
     --network host \
     --privileged \
+    --restart=until-stopped \
     --env="DISPLAY=$DISPLAY" \
     --env="QT_X11_NO_MITSHM=1" \
     --volume="/tmp/.X11-unix:/tmp/.X11-unix:rw" \
