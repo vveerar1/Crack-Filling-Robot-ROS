@@ -1,0 +1,32 @@
+# If not working, first do: sudo rm -rf /tmp/.docker.xauth
+# It still not working, try running the script as root.
+## Build the image first
+### docker build -t r2_path_planning .
+## then run this script
+xhost local:root
+
+XAUTH=/tmp/.docker.xauth
+
+docker pull osrf/ros:humble-desktop-full-jammy
+
+docker stop ros2
+
+docker rm ros2
+
+docker run -it \
+    --name=ros2 \
+    --network host \
+    --runtime nvidia \
+    --gpus all \
+    --privileged \
+    --env="DISPLAY=$DISPLAY" \
+    --env="QT_X11_NO_MITSHM=1" \
+    --volume="/tmp/.X11-unix:/tmp/.X11-unix:rw" \
+    --env="XAUTHORITY=$XAUTH" \
+    --volume="$XAUTH:$XAUTH" \
+    --volume="$PWD":"/home/ros":"rw" \
+    --volume="$PWD/docker.bashrc":"/root/.bashrc":"ro" \
+    osrf/ros:humble-desktop-full-jammy \
+    bash
+
+echo "Done."
