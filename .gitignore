@@ -341,3 +341,6 @@ doc/
 
 ## Setting files
 *.settings
+
+## Miscellaneous
+.bash_history
