@@ -8,7 +8,6 @@ set -e
 # 👤 Optional: create ros user and configure if not already done
 id -u ros &>/dev/null || {
     adduser --disabled-password --gecos "" --home /home/ros --no-create-home ros 1>/dev/null
-    # apt update && apt install -y ros-humble-rmw-cyclonedds-cpp
     cp /etc/skel/.bash_logout /etc/skel/.bashrc /etc/skel/.profile /home/ros/
     chown -R ros:ros /home/ros
     echo 'ros ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers.d/ros

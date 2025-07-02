@@ -4,7 +4,7 @@ xhost local:root
 
 XAUTH=/tmp/.docker.xauth
 
-docker pull osrf/ros:humble-desktop-full-jammy
+docker pull dustynv/ros:humble-desktop-l4t-r36.4.0
 
 docker ps -a --format '{{.Names}}' | grep -qw ros2 && docker stop ros2 > /dev/null
 
