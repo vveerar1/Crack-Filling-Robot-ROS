@@ -23,7 +23,7 @@ COLCON_CURRENT_PREFIX="/opt/ros/humble/install"
 if [ -e "$COLCON_CURRENT_PREFIX" ]; then
   echo ""
 else
-  COLCON_CURRENT_PREFIX="/opt/ros/humble/"
+  COLCON_CURRENT_PREFIX="/opt/ros/humble"
 fi
 _colcon_prefix_chain_bash_source_script "$COLCON_CURRENT_PREFIX/local_setup.bash"
 

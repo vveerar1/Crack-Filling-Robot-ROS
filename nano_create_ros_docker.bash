@@ -1,17 +1,14 @@
-# If not working, first do: sudo rm -rf /tmp/.docker.xauth
-# It still not working, try running the script as root.
-## Build the image first
-### docker build -t r2_path_planning .
-## then run this script
+#!/bin/bash 
+
 xhost local:root
 
 XAUTH=/tmp/.docker.xauth
 
-docker pull dustynv/ros:humble-desktop-l4t-r36.4.0
+docker pull osrf/ros:humble-desktop-full-jammy
 
-docker stop ros2
+docker ps -a --format '{{.Names}}' | grep -qw ros2 && docker stop ros2 > /dev/null
 
-docker rm ros2
+docker ps -a --format '{{.Names}}' | grep -qw ros2 && docker rm ros2 > /dev/null
 
 docker run -it \
     --name=ros2 \
@@ -23,9 +20,14 @@ docker run -it \
     --volume="/tmp/.X11-unix:/tmp/.X11-unix:rw" \
     --env="XAUTHORITY=$XAUTH" \
     --volume="$XAUTH:$XAUTH" \
-    --volume="$PWD":"/home/ros":"rw" \
-    --volume="$PWD/docker.bashrc":"/home/ros/.bashrc":"ro" \
+    --volume="$PWD/ROS2/ros2_ws":"/home/ros/ros2_ws":"rw" \
     dustynv/ros:humble-desktop-l4t-r36.4.0 \
-    bash -c "id -u ros &>/dev/null || adduser --disabled-password --gecos '' ros; su - ros"
+    bash -c "id -u ros &>/dev/null || (adduser --disabled-password --gecos '' --home /home/ros --no-create-home ros && chown -R ros:ros /home/ros\
+    && echo -e \"\nros ALL=(ALL) NOPASSWD:ALL\" >> /etc/sudoers.d/ros);\
+    su - ros -c 'cp /etc/skel/.bash_logout /etc/skel/.bashrc /etc/skel/.profile /home/ros/\
+    && echo -e \"\nexport DISPLAY=$DISPLAY\nexport QT_X11_NO_MITSHM=1\nexport XAUTHORITY=$XAUTHORITY\
+    \n\nexport ROS_DOMAIN_ID=0\nexport RMW_IMPLEMENTATION=rmw_cyclonedds_cpp\
+    \nunset ROS_LOCALHOST_ONLY\nsource /opt/ros/humble/install/setup.bash\nsource /home/ros/ros2_ws/install/setup.bash\" >> ~/.bashrc\
+    && source ~/.bashrc'; su - ros -c 'exec bash'"
 
 echo "Done."
