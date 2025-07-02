@@ -16,7 +16,7 @@ docker run -it \
     --privileged \
     --restart=unless-stopped \
     --entrypoint=/entrypoint.sh \
-    --volume="$PWD/entrypoint_pc.sh":/entrypoint.sh \
+    --volume="$PWD/entrypoint_nano.sh":/entrypoint.sh \
     --env="DISPLAY=$DISPLAY" \
     --env="QT_X11_NO_MITSHM=1" \
     --volume="/tmp/.X11-unix:/tmp/.X11-unix:rw" \
