@@ -46,5 +46,5 @@ else
     # 🧘 Stay alive for dev shells or exec bash fallback
     echo "✅ Done creating container. You can now run ROS commands."
     echo "🔄 Starting bash shell..."
-    exec bash
+    su -ros
 fi
