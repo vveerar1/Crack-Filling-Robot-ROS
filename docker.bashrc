@@ -101,11 +101,9 @@ fi
 export ROS_DOMAIN_ID=0
 export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
 unset ROS_LOCALHOST_ONLY
-ROS_INSTALL="/opt/ros/$ROS_DISTRO/install"
-if [ -e "$ROS_INSTALL" ]; then
-  echo ""
+if [ -e "/opt/ros/humble/install" ]; then
+  source "/opt/ros/humble/install/setup.bash"
 else
-  ROS_INSTALL="/opt/ros/$ROS_DISTRO/"
+  source "/opt/ros/humble/setup.bash"
 fi
-source /$ROS_INSTALL/setup.bash
 source /home/ros/ROS2/ros2_ws/install/setup.bash

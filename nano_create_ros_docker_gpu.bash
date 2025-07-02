@@ -28,6 +28,6 @@ docker run -it \
     --volume="$PWD":"/home/ros":"rw" \
     --volume="$PWD/docker.bashrc":"/home/ros/.bashrc":"ro" \
     dustynv/ros:humble-desktop-l4t-r36.4.0 \
-    bash -c "id -u ros &>/dev/null || (adduser --disabled-password --gecos '' ros && su - ros)"
+    bash -c "id -u ros &>/dev/null || adduser --disabled-password --gecos '' ros; su - ros"
 
 echo "Done."
