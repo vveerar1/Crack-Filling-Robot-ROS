@@ -36,9 +36,9 @@ class ArduinoNode(Node):
         self.timer = self.create_timer(0.05, self.timer_callback)  # 20Hz
 
         # Robot parameters (adjust as needed)
-        self.L = 0.18  # Half of robot length (meters)
-        self.W = 0.15  # Half of robot width (meters)
-        self.R = 0.03  # Wheel radius (meters)
+        self.L = 0.1016     # Half of robot length (meters)
+        self.W = 0.1016     # Half of robot width (meters)
+        self.R = 0.0485     # Wheel radius (meters)
         self.max_speed = 255  # Max motor speed
 
     def timer_callback(self):
