@@ -1,0 +1,6 @@
+# hybrid_nodes_pkg/config/params.yaml
+py_node:
+  ros__parameters:
+    serial_port: "/dev/ttyACM0"
+    baud_rate: 9600
+    

@@ -9,21 +9,35 @@ class ArduinoNode(Node):
     def __init__(self):
         super().__init__('arduino_node')
         self.odom_pub = self.create_publisher(String, 'arduino_odometer', 10)
-        self.subscription = self.create_subscription(
-            String,
-            'arduino_cmd',
-            self.arduino_cmd_callback,
-            10)
+        self.cmd_pub = self.create_publisher(String, 'arduino_cmd_vel', 10)
+        # self.subscription = self.create_subscription(
+        #     String,
+        #     'arduino_cmd',
+        #     self.arduino_cmd_callback,
+        #     10)
         self.cmd_vel_sub = self.create_subscription(
             Twist,
             'cmd_vel',
             self.cmd_vel_callback,
             10)
+        
+        # Declare parameters with default values
+        self.declare_parameter('serial_port', '/dev/ttyACM0')
+        self.declare_parameter('baud_rate', 9600)
+
+        # Get values (overridden if passed via launch or YAML)
+        serial_port = self.get_parameter('serial_port').get_parameter_value().string_value
+        baud_rate = self.get_parameter('baud_rate').get_parameter_value().integer_value
+        
+        self.get_logger().info(f"🛠 Using serial port: {serial_port} at {baud_rate} baud")
+        
         try:
-            self.arduino = serial.Serial('/dev/ttyACM0', 9600, timeout=0.01)
+            self.arduino = serial.Serial(serial_port, baud_rate, timeout=0.01)
+            self.get_logger().info("✅ Serial connection established")
         except serial.SerialException as e:
-            self.get_logger().error(f'Could not open serial port: {e}')
+            self.get_logger().error(f'❌ Could not open serial port: {e}')
             raise e
+        
         self.timer = self.create_timer(0.05, self.timer_callback)  # 20Hz
 
         # Robot parameters (adjust as needed)
@@ -44,12 +58,12 @@ class ArduinoNode(Node):
         except Exception as e:
             self.get_logger().error(f'Error reading from Arduino: {e}')
 
-    def arduino_cmd_callback(self, msg):
-        try:
-            self.arduino.write((msg.data + '\n').encode('utf-8'))
-            self.get_logger().info(f'Sent to Arduino: {msg.data}')
-        except Exception as e:
-            self.get_logger().error(f'Error writing to Arduino: {e}')
+    # def arduino_cmd_callback(self, msg):
+    #     try:
+    #         self.arduino.write((msg.data + '\n').encode('utf-8'))
+    #         self.get_logger().info(f'Sent to Arduino: {msg.data}')
+    #     except Exception as e:
+    #         self.get_logger().error(f'Error writing to Arduino: {e}')
 
     def cmd_vel_callback(self, msg):
         # Mecanum inverse kinematics
@@ -79,6 +93,7 @@ class ArduinoNode(Node):
         cmd_str = f"{motor_speeds[0]} {motor_speeds[1]} {motor_speeds[2]} {motor_speeds[3]}"
         try:
             self.arduino.write((cmd_str + '\n').encode('utf-8'))
+            self.cmd_pub.publish(String(data=cmd_str))
             self.get_logger().info(f'Sent to Arduino (from cmd_vel): {cmd_str}')
         except Exception as e:
             self.get_logger().error(f'Error writing to Arduino: {e}')

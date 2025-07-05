@@ -8,7 +8,7 @@ set -e
 # 👤 Optional: create ros user and configure if not already done
 id -u ros &>/dev/null || {
     adduser --disabled-password --gecos "" --home /home/ros --no-create-home ros 1>/dev/null
-    pip3 install pyserial
+    pip3 install -r requirements.txt
     cp /etc/skel/.bash_logout /etc/skel/.bashrc /etc/skel/.profile /home/ros/
     touch /home/ros/.inputrc
     chown -R ros:ros /home/ros
