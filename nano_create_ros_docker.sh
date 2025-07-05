@@ -10,10 +10,16 @@ docker ps -a --format '{{.Names}}' | grep -qw ros2 && docker stop ros2 > /dev/nu
 
 docker ps -a --format '{{.Names}}' | grep -qw ros2 && docker rm ros2 > /dev/null
 
+# Append these to the docker run commant if using NVIDIA GPU
+# If you want to use the NVIDIA GPU, make sure to have the NVIDIA Container Toolkit installed.
+
+    # --runtime=nvidia \
+    # --gpus=all \
+
 docker run -it \
     --name=ros2 \
     --network=host \
-    --privileged \
+    --device=/dev/ttyACM0 \
     --restart=unless-stopped \
     --entrypoint=/entrypoint.sh \
     --volume="$PWD/entrypoint_nano.sh":/entrypoint.sh \
@@ -22,6 +28,5 @@ docker run -it \
     --volume="/tmp/.X11-unix:/tmp/.X11-unix:rw" \
     --env="XAUTHORITY=$XAUTH" \
     --volume="$XAUTH:$XAUTH" \
-    --volume="$PWD/ROS2/ros2_ws":"/home/ros/ros2_ws":"rw" \
-    dustynv/ros:humble-desktop-l4t-r36.4.0 \
-
+    --volume="$PWD/ROS2/ros2_nano":"/home/ros/ros2_ws":"rw" \
+    dustynv/ros:humble-desktop-l4t-r36.4.0

@@ -10,9 +10,16 @@ id -u ros &>/dev/null || {
     adduser --disabled-password --gecos "" --home /home/ros --no-create-home ros 1>/dev/null
     pip3 install pyserial
     cp /etc/skel/.bash_logout /etc/skel/.bashrc /etc/skel/.profile /home/ros/
+    touch /home/ros/.inputrc
     chown -R ros:ros /home/ros
     echo 'ros ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers.d/ros
     chmod 0440 /etc/sudoers.d/ros
+    echo '# Respect default shortcuts.' >> /home/ros/.inputrc
+    echo '$include /etc/inputrc' >> /home/ros/.inputrc
+    echo -e '\n## arrow up' >> /home/ros/.inputrc
+    echo '"\e[A":history-search-backward' >> /home/ros/.inputrc
+    echo '## arrow down' >> /home/ros/.inputrc
+    echo '"\e[B":history-search-forward' >> /home/ros/.inputrc
     echo -e "\n# PATH for Python packages" >> /home/ros/.bashrc
     echo 'export PATH=$PATH:/home/ros/.local/bin' >> /home/ros/.bashrc
     echo -e "\n# Display Passthrough Variables" >> /home/ros/.bashrc
