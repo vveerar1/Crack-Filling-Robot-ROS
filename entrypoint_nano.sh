@@ -8,20 +8,25 @@ set -e
 # 👤 Optional: create ros user and configure if not already done
 id -u ros &>/dev/null || {
     adduser --disabled-password --gecos "" --home /home/ros --no-create-home ros 1>/dev/null
+    pip3 install pyserial
     cp /etc/skel/.bash_logout /etc/skel/.bashrc /etc/skel/.profile /home/ros/
     chown -R ros:ros /home/ros
     echo 'ros ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers.d/ros
     chmod 0440 /etc/sudoers.d/ros
+    echo -e "\n# PATH for Python packages" >> /home/ros/.bashrc
+    echo 'export PATH=$PATH:/home/ros/.local/bin' >> /home/ros/.bashrc
     echo -e "\n# Display Passthrough Variables" >> /home/ros/.bashrc
-    echo -e "export DISPLAY=$DISPLAY" >> /home/ros/.bashrc
-    echo -e "export QT_X11_NO_MITSHM=1" >> /home/ros/.bashrc
-    echo -e "export XAUTHORITY=$XAUTHORITY" >> /home/ros/.bashrc
+    echo "export DISPLAY=$DISPLAY" >> /home/ros/.bashrc
+    echo "export QT_X11_NO_MITSHM=1" >> /home/ros/.bashrc
+    echo "export XAUTHORITY=$XAUTHORITY" >> /home/ros/.bashrc
     echo -e "\n# ROS 2 Variables" >> /home/ros/.bashrc
-    echo -e "export ROS_DOMAIN_ID=0" >> /home/ros/.bashrc
-    echo -e "export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp" >> /home/ros/.bashrc
-    echo -e "unset ROS_LOCALHOST_ONLY" >> /home/ros/.bashrc
-    echo -e "source /opt/ros/humble/install/setup.bash" >> /home/ros/.bashrc
-    echo -e "source /home/ros/ros2_ws/install/setup.bash" >> /home/ros/.bashrc
+    echo "export ROS_DOMAIN_ID=0" >> /home/ros/.bashrc
+    echo "export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp" >> /home/ros/.bashrc
+    echo "unset ROS_LOCALHOST_ONLY" >> /home/ros/.bashrc
+    echo "source /opt/ros/humble/install/setup.bash" >> /home/ros/.bashrc
+    echo "source /home/ros/ros2_ws/install/setup.bash" >> /home/ros/.bashrc
+    usermod -aG dialout ros
+    for dev in /dev/ttyACM*; do sudo chmod a+rw "$dev"; done
 }
 
 # 🌐 Set environment variables
