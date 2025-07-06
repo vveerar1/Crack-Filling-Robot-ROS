@@ -1,0 +1,8 @@
+arduino_node:
+  ros__parameters:
+    serial_port: "/dev/ttyACM0"
+    baud_rate: 9600
+    L: 0.1016         # Half of robot length (meters)
+    W: 0.1016         # Half of robot width (meters)
+    R: 0.0485         # Wheel radius (meters)
+    max_speed: 255    # Max motor speed (PWM)

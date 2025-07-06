@@ -2,6 +2,7 @@ from launch import LaunchDescription
 from launch_ros.actions import Node
 from launch.substitutions import LaunchConfiguration
 from launch.actions import DeclareLaunchArgument
+from ament_index_python.packages import get_package_share_directory
 import os
 
 def generate_launch_description():
@@ -18,8 +19,7 @@ def generate_launch_description():
     )
 
     config_dir = os.path.join(
-        os.getenv('AMENT_PREFIX_PATH').split(':')[0],
-        'share/walle_bot',
+        get_package_share_directory('walle_bot'),
         'config',
         'params.yaml'
     )
@@ -34,7 +34,7 @@ def generate_launch_description():
             name='arduino_node',
             output='screen',
             parameters=[
-                config_dir,
+                config_dir,  # <-- path to params.yaml
                 {
                     'serial_port': LaunchConfiguration('serial_port'),
                     'baud_rate': LaunchConfiguration('baud_rate')
