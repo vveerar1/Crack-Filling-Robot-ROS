@@ -27,7 +27,7 @@ $ bash connect_ros_docker.bash
 ```
 ### Settin up your Jetson NANO
 
-Upgade Jetson NANO to Ubuntu 20.04
+#### Upgade Jetson NANO to Ubuntu 20.04
 
 - Method 1: Flash Image </br>
 Flash the provided Ubuntu 20.04 OS image
@@ -37,7 +37,7 @@ Flash the provided Ubuntu 20.04 OS image
 Upgrade it manually by yourself, follow this link. 
 [Follow Link](https://qengineering.eu/install-ubuntu-20.04-on-jetson-nano.html)
 
-Install ROS2
+#### Install ROS2
 
 - Method 1: Docker </br>
 You can install `ros2` by running the below commmand in your terminal
@@ -55,3 +55,8 @@ You can install `ros2` by running the below commmand in your terminal
 Ubuntu 20.04 is a Tier 3 OS for ROS2 humble 
 We need to install ROS2 humble on Jetson NANO by building from the source.
 [Follow Link](https://docs.ros.org/en/humble/Installation/Alternatives/Ubuntu-Development-Setup.html)
+
+#### Other Configs:
+- [Overclocking Jetson Nano CPU to 2 GHz and GPU to 1 GHz](https://qengineering.eu/overclocking-the-jetson-nano.html)
+- [Automatic Fan Control](https://github.com/Pyrestone/jetson-fan-ctl)
+- [Other Useful Scripts](https://github.com/dusty-nv/jetson-scripts/tree/master)
