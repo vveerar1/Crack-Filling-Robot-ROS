@@ -8,10 +8,10 @@ set -e
 # 👤 Optional: create ros user and configure if not already done
 id -u ros &>/dev/null || {
     adduser --disabled-password --gecos "" --home /home/ros --no-create-home ros 1>/dev/null
-    pip3 install -r requirements.txt
     cp /etc/skel/.bash_logout /etc/skel/.bashrc /etc/skel/.profile /home/ros/
     touch /home/ros/.inputrc
     chown -R ros:ros /home/ros
+    pip3 install pyserial>=3.5 --index-url https://pypi.org/simple
     echo 'ros ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers.d/ros
     chmod 0440 /etc/sudoers.d/ros
     echo '# Respect default shortcuts.' >> /home/ros/.inputrc

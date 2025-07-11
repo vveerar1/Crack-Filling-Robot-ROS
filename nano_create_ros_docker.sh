@@ -20,6 +20,7 @@ docker run -it \
     --name=ros2 \
     --network=host \
     --device=/dev/ttyACM0 \
+    --device=/dev/input \
     --restart=unless-stopped \
     --entrypoint=/entrypoint.sh \
     --volume="$PWD/entrypoint_nano.sh":/entrypoint.sh \
