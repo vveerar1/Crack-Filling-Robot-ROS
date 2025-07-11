@@ -17,7 +17,7 @@ class ArduinoNode(Node):
 
         # Declare parameters with default values
         self.declare_parameter('serial_port', '/dev/ttyACM0')
-        self.declare_parameter('baud_rate', 9600)
+        self.declare_parameter('baud_rate', 115200)
         self.declare_parameter('L', 0.1016)         # Half robot length (meters)
         self.declare_parameter('W', 0.1016)         # Half robot width (meters)
         self.declare_parameter('R', 0.0485)         # Wheel radius (meters)
@@ -50,6 +50,18 @@ class ArduinoNode(Node):
 
         self.timer = self.create_timer(0.05, self.timer_callback)  # 20Hz
         
+        # Add command monitoring and buffer management
+        self.cmd_count = 0
+        self.last_reset_count = 0
+        self.reset_threshold = 100  # Reset connection after this many commands
+        self.declare_parameter('buffer_size', 64)
+        self.buffer_size = self.get_parameter('buffer_size').get_parameter_value().integer_value
+        self.last_cmd_time = self.get_clock().now()
+        self.min_cmd_interval = 1.0 / 20.0  # Minimum 50ms between commands
+        
+        # Add monitoring timer
+        self.monitor_timer = self.create_timer(1.0, self.monitor_connection)
+        
     def timer_callback(self):
         """Read odometry from Arduino and publish."""
         try:
@@ -62,9 +74,35 @@ class ArduinoNode(Node):
                     self.get_logger().debug(f'Published odometer: {msg.data}')
         except Exception as e:
             self.get_logger().error(f'Error reading from Arduino: {e}')
+            
+    def monitor_connection(self):
+        """Monitor connection health and reset if needed"""
+        if self.cmd_count - self.last_reset_count > self.reset_threshold:
+            # self.get_logger().warn(f"Command threshold reached ({self.cmd_count}), resetting connection")
+            self.reset_serial()
+            
+    def reset_serial(self):
+        """Reset the serial connection"""
+        try:
+            port = self.arduino.port
+            baud = self.arduino.baudrate
+            if self.arduino.is_open:
+                self.arduino.close()
+            self.arduino = serial.Serial(port, baud, timeout=0.01)
+            self.last_reset_count = self.cmd_count
+            self.get_logger().info("Serial connection reset successfully")
+        except Exception as e:
+            self.get_logger().error(f"Failed to reset connection: {e}")
 
     def cmd_vel_callback(self, msg: Twist):
         """Convert cmd_vel to wheel speeds and send to Arduino."""
+         # Rate limiting
+        now = self.get_clock().now()
+        if (now - self.last_cmd_time).nanoseconds / 1e9 < self.min_cmd_interval:
+            return
+        self.last_cmd_time = now
+        
+        # Velocity Calculations
         Vx = msg.linear.x
         Vy = msg.linear.y
         Wz = msg.angular.z
@@ -116,11 +154,28 @@ class ArduinoNode(Node):
         # Send to Arduino as "s1 s2 s3 s4"
         cmd_str = f"{motor_speeds[0]} {motor_speeds[1]} {motor_speeds[2]} {motor_speeds[3]}"
         try:
-            self.arduino.write((cmd_str + '\n').encode('utf-8'))
+            # Check buffer state
+            if self.arduino.out_waiting > (self.buffer_size // 2):
+                self.arduino.reset_output_buffer()
+                self.get_logger().warn("Output buffer more than half full - clearing")
+                
+            cmd_bytes = (cmd_str + '\n').encode('utf-8')
+            if len(cmd_bytes) > (self.buffer_size - self.arduino.out_waiting):
+                self.arduino.reset_output_buffer()
+                
+            self.arduino.write(cmd_bytes)
+            self.arduino.flush()
+            self.cmd_count += 1
             self.cmd_pub.publish(String(data=cmd_str))
-            self.get_logger().info(f'Sent to Arduino (from cmd_vel): {cmd_str}')
+            
+            # # Reduce logging frequency
+            # if self.cmd_count % 50 == 0:
+            #     self.cmd_pub.publish(String(data=cmd_str))
+            #     self.get_logger().info(f'Command count: {self.cmd_count}, Buffer: {self.arduino.out_waiting}')
+                
         except Exception as e:
             self.get_logger().error(f'Error writing to Arduino: {e}')
+            self.reset_serial()
 
     def destroy_node(self):
         """Clean up serial connection on shutdown."""

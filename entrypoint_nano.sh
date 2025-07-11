@@ -10,6 +10,9 @@ id -u ros &>/dev/null || {
     adduser --disabled-password --gecos "" --home /home/ros --no-create-home ros 1>/dev/null
     cp /etc/skel/.bash_logout /etc/skel/.bashrc /etc/skel/.profile /home/ros/
     touch /home/ros/.inputrc
+    touch /etc/udev/rules.d/99-input.rules
+    echo 'KERNEL=="event*", SUBSYSTEM=="input", GROUP="input", MODE="0660"' >> /etc/udev/rules.d/99-input.rules
+    echo 'KERNEL=="js*", SUBSYSTEM=="input", GROUP="input", MODE="0660"' >> /etc/udev/rules.d/99-input.rules
     chown -R ros:ros /home/ros
     pip3 install pyserial>=3.5 --index-url https://pypi.org/simple
     echo 'ros ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers.d/ros
@@ -47,6 +50,11 @@ unset ROS_LOCALHOST_ONLY
 # 📦 Source ROS setup
 source /opt/ros/humble/install/setup.bash
 source /home/ros/ros2_ws/install/setup.bash
+
+# 🛠️ Run udev rules to ensure input devices are recognized
+/lib/systemd/systemd-udevd --daemon
+udevadm control --reload-rules
+udevadm trigger
 
 # 🚀 Optional: launch ROS file if specified
 if [ "$1" == "launch" ]; then

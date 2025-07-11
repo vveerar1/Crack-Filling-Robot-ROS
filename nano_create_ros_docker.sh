@@ -21,6 +21,7 @@ docker run -it \
     --network=host \
     --device=/dev/ttyACM0 \
     --device=/dev/input \
+    --privileged \
     --restart=unless-stopped \
     --entrypoint=/entrypoint.sh \
     --volume="$PWD/entrypoint_nano.sh":/entrypoint.sh \
