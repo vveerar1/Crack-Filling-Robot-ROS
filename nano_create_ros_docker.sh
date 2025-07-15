@@ -15,6 +15,8 @@ docker ps -a --format '{{.Names}}' | grep -qw ros2 && docker rm ros2 > /dev/null
 
     # --runtime=nvidia \
     # --gpus=all \
+    # --env="NVIDIA_VISIBLE_DEVICES=all" \  
+    # --env="NVIDIA_DRIVER_CAPABILITIES=all" \
 
 # If passing a USB device, example Arduino
     # --device=/dev/ttyACM0 \   
