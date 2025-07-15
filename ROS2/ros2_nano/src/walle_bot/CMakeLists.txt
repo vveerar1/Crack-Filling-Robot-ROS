@@ -27,6 +27,7 @@ endif()
 # Install the executables
 install(PROGRAMS
   python_nodes/arduino_node.py
+  python_nodes/go2goal.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

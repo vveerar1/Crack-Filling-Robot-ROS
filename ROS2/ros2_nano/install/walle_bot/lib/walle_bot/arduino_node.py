@@ -22,7 +22,7 @@ class ArduinoNode(Node):
         self.declare_parameter('W', 0.1016)         # Half robot width (meters)
         self.declare_parameter('R', 0.0485)         # Wheel radius (meters)
         self.declare_parameter('max_speed', 255)    # Max motor speed (PWM)
-        
+        self.declare_parameter('min_speed', 100)    # Min motor speed (PWM)
 
         # Get parameter values
         serial_port = self.get_parameter('serial_port').get_parameter_value().string_value
@@ -31,6 +31,7 @@ class ArduinoNode(Node):
         self.W = self.get_parameter('W').get_parameter_value().double_value
         self.R = self.get_parameter('R').get_parameter_value().double_value
         self.max_speed = self.get_parameter('max_speed').get_parameter_value().integer_value
+        self.min_speed = self.get_parameter('min_speed').get_parameter_value().integer_value
         
         self.get_logger().info(f"🛠 Using serial port: {serial_port} at {baud_rate} baud")
         self.get_logger().info(f"Using L={self.L}, W={self.W}, R={self.R}, max_speed={self.max_speed}")
@@ -93,6 +94,17 @@ class ArduinoNode(Node):
             self.get_logger().info("Serial connection reset successfully")
         except Exception as e:
             self.get_logger().error(f"Failed to reset connection: {e}")
+            
+    def map_velocity_to_pwm(self, pwm_input: int) -> int:
+        if pwm_input < 0:
+            # Map -255 to 0 → -255 to -100
+            return int((pwm_input + self.max_speed) * ((self.max_speed-self.min_speed) / self.max_speed) - self.max_speed)
+        elif pwm_input > 0:
+            # Map 0 to 255 → 100 to 255
+            return int(pwm_input * ((self.max_speed-self.min_speed) / self.max_speed) + self.min_speed)
+        else:
+            return 0
+
 
     def cmd_vel_callback(self, msg: Twist):
         """Convert cmd_vel to wheel speeds and send to Arduino."""
@@ -113,16 +125,16 @@ class ArduinoNode(Node):
         R = self.R
 
         # Mecanum inverse kinematics (wheel speeds in m/s)
-        v1 = (1/R) * (Vx + Vy + (L + W) * Wz)
-        v2 = (1/R) * (Vx - Vy - (L + W) * Wz)
-        v3 = (1/R) * (Vx + Vy - (L + W) * Wz)
-        v4 = (1/R) * (Vx - Vy + (L + W) * Wz)
+        # v1 = (1/R) * (Vx + Vy + (L + W) * Wz)
+        # v2 = (1/R) * (Vx - Vy - (L + W) * Wz)
+        # v3 = (1/R) * (Vx + Vy - (L + W) * Wz)
+        # v4 = (1/R) * (Vx - Vy + (L + W) * Wz)
         # Mecanum inverse kinematics Without Rotation (wheel speeds in m/s) 
         # v1 = (1/R) * (Vx + Vy)  # Front-Left
         # v2 = (1/R) * (Vx - Vy)  # Front-Right
         # v3 = (1/R) * (Vx + Vy)  # Rear-Left
         # v4 = (1/R) * (Vx - Vy)  # Rear-Right
-        speeds = [v1, v2, v3, v4]
+        # speeds = [v1, v2, v3, v4]
         
         # self.get_logger().info(f"Raw motor speeds (pre-scale): {speeds}")
         
@@ -134,10 +146,18 @@ class ArduinoNode(Node):
         scale_linear = self.max_speed / (max_linear / 2) 
         scale_angular = self.max_speed / max_angular
 
+        # def scale_wheel(Vx, Vy, Wz, sign_vx, sign_vy, sign_wz):
+        #     linear = (1/R) * (sign_vx * Vx + sign_vy * Vy) * scale_linear
+        #     rot = (1/R) * (L + W) * sign_wz * Wz * scale_angular
+        #     return int(linear + rot)
+        
         def scale_wheel(Vx, Vy, Wz, sign_vx, sign_vy, sign_wz):
-            linear = (1/R) * (sign_vx * Vx + sign_vy * Vy) * scale_linear
-            rot = (1/R) * (L + W) * sign_wz * Wz * scale_angular
-            return int(linear + rot)
+            linear_pwm = (1/R) * (sign_vx * Vx + sign_vy * Vy) * scale_linear
+            rot_pwm = (1/R) * (L + W) * sign_wz * Wz * scale_angular
+
+            # Apply separate PWM mapping
+            total_pwm = self.map_velocity_to_pwm(linear_pwm + rot_pwm)
+            return total_pwm
 
         motor_speeds = [
             scale_wheel(Vx, Vy, Wz, 1, 1, 1),   # v1
@@ -146,10 +166,14 @@ class ArduinoNode(Node):
             scale_wheel(Vx, Vy, Wz, 1, -1, 1),  # v4
         ]
         
-        # self.get_logger().info(f"Scaled Motor speeds (post-scaling): {motor_speeds}")
+        self.get_logger().info(f"Scaled Motor speeds (post-scaling): {motor_speeds}")
 
         # Clip to [-max_speed, max_speed]
         motor_speeds = [max(-self.max_speed, min(self.max_speed, ms)) for ms in motor_speeds]
+        
+        # # Ensure minimum and maximum speed is respected
+        # motor_speeds = [max(-self.max_speed, min(self.max_speed, (self.min_speed if ms > 0 else -self.min_speed)
+        #                                          if 0 < abs(ms) < self.min_speed else ms)) for ms in motor_speeds]
 
         # Send to Arduino as "s1 s2 s3 s4"
         cmd_str = f"{motor_speeds[0]} {motor_speeds[1]} {motor_speeds[2]} {motor_speeds[3]}"
