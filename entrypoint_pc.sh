@@ -11,6 +11,9 @@ id -u ros &>/dev/null || {
     apt update && apt install -y ros-humble-rmw-cyclonedds-cpp
     cp /etc/skel/.bash_logout /etc/skel/.bashrc /etc/skel/.profile /home/ros/
     touch /home/ros/.inputrc
+    touch /etc/udev/rules.d/99-input.rules
+    echo 'KERNEL=="event*", SUBSYSTEM=="input", GROUP="input", MODE="0660"' >> /etc/udev/rules.d/99-input.rules
+    echo 'KERNEL=="js*", SUBSYSTEM=="input", GROUP="input", MODE="0660"' >> /etc/udev/rules.d/99-input.rules
     chown -R ros:ros /home/ros
     echo 'ros ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers.d/ros
     chmod 0440 /etc/sudoers.d/ros
@@ -30,6 +33,8 @@ id -u ros &>/dev/null || {
     echo -e "unset ROS_LOCALHOST_ONLY" >> /home/ros/.bashrc
     echo -e "source /opt/ros/humble/setup.bash" >> /home/ros/.bashrc
     echo -e "source /home/ros/ros2_ws/install/setup.bash" >> /home/ros/.bashrc
+    usermod -aG dialout ros
+    for dev in /dev/ttyACM*; do sudo chmod a+rw "$dev"; done
 }
 
 # 🌐 Set environment variables
@@ -43,6 +48,11 @@ unset ROS_LOCALHOST_ONLY
 # 📦 Source ROS setup
 source /opt/ros/humble/setup.bash
 source /home/ros/ros2_ws/install/setup.bash
+
+# 🛠️ Run udev rules to ensure input devices are recognized
+/lib/systemd/systemd-udevd --daemon
+udevadm control --reload-rules
+udevadm trigger
 
 # 🚀 Optional: launch ROS file if specified
 if [ "$1" == "launch" ]; then
