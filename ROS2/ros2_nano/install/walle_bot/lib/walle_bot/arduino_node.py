@@ -17,7 +17,7 @@ class ArduinoNode(Node):
 
         # Declare parameters with default values
         self.declare_parameter('serial_port', '/dev/ttyACM0')
-        self.declare_parameter('baud_rate', 115200)
+        self.declare_parameter('baud_rate', 9600)   # Serial baud rate
         self.declare_parameter('L', 0.1016)         # Half robot length (meters)
         self.declare_parameter('W', 0.1016)         # Half robot width (meters)
         self.declare_parameter('R', 0.0485)         # Wheel radius (meters)
