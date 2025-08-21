@@ -344,3 +344,6 @@ doc/
 
 ## Miscellaneous
 .bash_history
+
+## devcontainer
+.devcontainer

@@ -11,11 +11,13 @@ RUN apt-get clean \
     apt-utils \
     nano \
     vim \
+    python3-pip \
     joystick \
     evtest \
+    ros-humble-rmw-cyclonedds-cpp \
     && rm -rf /var/lib/apt/lists/*
 COPY requirements.txt /tmp/requirements.txt
-RUN pip3 install --index-url https://pypi.org/simple -r /tmp/requirements.txt
+RUN pip3 install --no-cache-dir --index-url https://pypi.org/simple -r /tmp/requirements.txt
 
 # Create a non-root user
 ARG USERNAME=ros
