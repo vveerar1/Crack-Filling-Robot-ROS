@@ -4,8 +4,8 @@ export PATH=$PATH:/home/ros/.local/bin
 
 # Display Passthrough Variables
 export DISPLAY=$DISPLAY
-# export QT_X11_NO_MITSHM=1
 # export XAUTHORITY=$XAUTHORITY
+# export QT_X11_NO_MITSHM=1
 
 # ROS 2 Variables
 export ROS_DOMAIN_ID=0
