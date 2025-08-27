@@ -16,7 +16,7 @@ class ArduinoNode(Node):
         super().__init__('arduino_node')
 
         # Declare parameters with default values
-        self.declare_parameter('serial_port', '/dev/ttyACM0')
+        self.declare_parameter('serial_port', '/dev/serial/by-id/usb-Arduino__www.arduino.cc__0043_95437313335351A021B1-if00')
         self.declare_parameter('baud_rate', 9600)   # Serial baud rate
         self.declare_parameter('L', 0.1016)         # Half robot length (meters)
         self.declare_parameter('W', 0.1016)         # Half robot width (meters)
