@@ -22,6 +22,7 @@ RUN apt-get clean \
     ros-humble-rmw-cyclonedds-cpp 
 ADD requirements.txt /tmp/requirements.txt
 RUN pip3 install --no-cache-dir -r /tmp/requirements.txt
+RUN curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | sh
 
 # Create a non-root user
 ARG USERNAME=ros
@@ -45,6 +46,13 @@ RUN usermod -aG dialout ${USERNAME}
 
 # Setup working directory
 WORKDIR /home/$USERNAME/
+
+# Initializing Arduino-Cli
+USER ${USERNAME}
+RUN arduino-cli config init --dest-dir /home/$USERNAME/.arduino15 \
+  && arduino-cli core update-index --config-file /home/$USERNAME/.arduino15/arduino-cli.yaml 
+  # && chown -R $USER_UID:$USER_GID /home/$USERNAME/.arduino15
+USER root
 
 # Setup VNC
 # ARG INSTALL_VNC

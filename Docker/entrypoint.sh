@@ -2,17 +2,25 @@
 
 set -e
 
-# Start supervisord in background
-# if supervisord -c /etc/supervisor/supervisord.conf >/dev/null 2>&1; then
-#     echo "✅ GUI stack started successfully"
-# else
-#     echo "❌ GUI stack failed to start"
-# fi
+# Start the GUI stack if installed
 if $INSTALL_VNC ; then
-    echo "GUI stack started successfully"
-    /usr/local/share/desktop-init.sh
+    if /usr/local/share/desktop-init.sh; then
+        echo "GUI stack started successfully"
+    else
+        echo "Error: GUI stack failed to start" >&2
+        exit 1
+    fi
 else
-    echo "GUI stack failed to start"
+    echo "GUI stack not installed, skipping..."
+fi
+
+# Initialize Arduino CLI
+echo "Initializing Arduino-Cli"
+# arduino-cli board list
+arduino-cli core install $(arduino-cli board list | awk '!/Unknown/ && NR>1 {print $NF}' | sort -u)
+if [ ! -d "/home/ros/Arduino/libraries/Sabertooth" ]; then
+    arduino-cli config set library.enable_unsafe_install true
+    arduino-cli lib install --zip-path /home/ros/Arduino/Sabertooth.zip
 fi
 
 # Optional: launch ROS file if specified

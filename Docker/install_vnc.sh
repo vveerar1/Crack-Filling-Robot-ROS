@@ -9,6 +9,8 @@
 
 NOVNC_VERSION="${NOVNCVERSION:-"1.6.0"}" # TODO: Add in a 'latest' auto-detect and swap name to 'version'
 
+ARCH=$(uname -m)
+
 VNC_PASSWORD=${PASSWORD:-"vscode"}
 if [ "$VNC_PASSWORD" = "noPassword" ]; then
     unset VNC_PASSWORD
@@ -132,6 +134,7 @@ fluxbox_menu="$(cat \
         [exec] (Set Resolution) { tilix -t "Set Resolution" -e bash /usr/local/bin/set-resolution } <>
         [exec] (Edit Application Menu) { mousepad ~/.fluxbox/menu } <>
         [exec] (Passwords and Keys) { seahorse } <>
+        [exec] (Jetson Stats) { tilix -t "Jetson Stats" -e jtop } <>
         [exec] (Top Processes) { tilix -t "Top" -e htop } <>
         [exec] (Disk Utilization) { tilix -t "Disk Utilization" -e ncdu / } <>
         [exec] (Editres) {editres} <>

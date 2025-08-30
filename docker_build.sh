@@ -53,19 +53,21 @@ clean_up() {
 
 run_container() {
 
-  # xhost local:root
-
   docker run -itd \
       --user=ros \
       --name=ros2 \
       --network=host \
       --ipc=host \
+      --cap-add=SYS_PTRACE \
+      --security-opt seccomp=unconfined \
       --volume="/dev:/dev" \
       --env-file Docker/.env \
       --device-cgroup-rule="c 13:* rmw" \
       --device-cgroup-rule="c 189:* rmw" \
       --device-cgroup-rule="c 166:* rmw" \
       --volume="$PWD/ROS2/$WORKSPS":"/home/ros/ros2_ws":"rw" \
+      --volume="$PWD/Arduino":"/home/ros/Arduino":"rw" \
+      --volume="$PWD/../printer_data/comms":"/home/ros/Klipper":"rw" \
       ros2 > /dev/null 2>&1
 
   docker exec -it --user ros ros2 bash
@@ -85,7 +87,6 @@ case "$1" in
   *)
     echo "Usage: $0 [-b | -r]"
     echo "  -b  Build and run"
-    echo "  -bv  Build and run with VNC"
     echo "  -r  Run only"
     exit 1
     ;;
